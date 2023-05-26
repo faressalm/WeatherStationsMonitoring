@@ -1,5 +1,7 @@
 FROM python:3.9
 
+RUN mkdir -p /app/data
+VOLUME /app/data
 WORKDIR /app
 
 COPY requirements.txt .
