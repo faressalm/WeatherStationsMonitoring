@@ -56,11 +56,13 @@ public class CentralStation {
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         Consumer<String, String> consumer = new org.apache.kafka.clients.consumer.KafkaConsumer<>(props);
         consumer.subscribe(Collections.singletonList(TOPIC_NAME));
-
+        Bitcask bitcask = new Bitcask();
         // Consume messages from Kafka and write to Parquet
         Map<Long, List<GenericRecord>> recordBatch = new HashMap<>();
         int batchSize = 100;
         int processedCount = 0;
+        // invoke thread to compact on replica
+        bitcask.run_compaction();
         while (true) {
             ConsumerRecords<String, String> messages = consumer.poll(Duration.ofMillis(1000));
             for (ConsumerRecord<String, String> record : messages) {
@@ -69,6 +71,7 @@ public class CentralStation {
                 SensorData sensorData = null;
                 try {
                     sensorData = objectMapper.readValue(record.value(), SensorData.class);
+                    // Parquet
                     setAvroRecord(sensorData, recordBatch);
                     if (++processedCount == batchSize) {
                         // Write the batch to Parquet file
@@ -77,7 +80,11 @@ public class CentralStation {
                         System.out.println("Processed records count: " + processedCount);
                         processedCount = 0;
                     }
+                    // BitCask
+                    bitcask.put(Math.toIntExact(sensorData.getStationId()), record.value());
+                    System.out.println("BitCask output" + bitcask.get(1));
                 } catch (Exception e) {
+                    bitcask.shut_down();
                     e.printStackTrace();
                 }
             }
@@ -100,7 +107,8 @@ public class CentralStation {
         weatherInfo.put("wind_speed", sensorData.getWeather().getWindSpeed());
         recordBuilder.set("weather", weatherInfo);
         GenericRecord rec = recordBuilder.build();
-        recordBatch.get(sensorData.getStationId()).add(rec);
+        recordBatch.computeIfAbsent(sensorData.getStationId(), key -> new ArrayList<>()).add(rec);
+
     }
     private static void writeRecordBatch(Map<Long, List<GenericRecord>> recordBatch) {
         try {
@@ -137,12 +145,12 @@ public class CentralStation {
             outputDir.mkdirs();
         }
 
-        outputDir = new File(OUTPUT_DIRECTORY + "/" + stationId);
+        outputDir = new File(OUTPUT_DIRECTORY + "/station" + stationId);
         if (!outputDir.exists()) {
             outputDir.mkdirs();
         }
 
-        String parquetFilePath = OUTPUT_DIRECTORY + "/" + stationId + File.separator + dateTime + ".parquet";
+        String parquetFilePath = OUTPUT_DIRECTORY + "/station" + stationId + File.separator + dateTime + ".parquet";
         ParquetWriter<GenericRecord> writer;
         try {
             writer = AvroParquetWriter
