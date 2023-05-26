@@ -37,9 +37,17 @@ services:
 #      - kafka
 #    environment:
 #      - STATION_ID=2
+
   centralstation:
      build: centralstation
      container_name: centralstation
+     depends_on:
+       - kafka
+       - weatherstation
+
+  raindetector:
+     build: raindetector
+     container_name: raindetector
      depends_on:
        - kafka
        - weatherstation
