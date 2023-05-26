@@ -1,15 +1,49 @@
 package org.example;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.avro.Schema;
 import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.apache.parquet.avro.AvroParquetWriter;
+import org.apache.parquet.hadoop.ParquetWriter;
+import org.apache.avro.generic.GenericData;
+import org.apache.avro.generic.GenericRecord;
+import org.apache.avro.generic.GenericRecordBuilder;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.parquet.hadoop.metadata.CompressionCodecName;
 
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.time.Duration;
-import java.util.Collections;
-import java.util.Properties;
+import java.util.*;
 
 
 public class CentralStation {
+    private static final String OUTPUT_DIRECTORY = "/usr/app/weather_monitoring/stations_parquet_log";
+
+    // Create Avro schema
+    private static final Schema avroSchema = new Schema.Parser().parse(
+            "{" +
+                    "\"type\": \"record\"," +
+                    "\"name\": \"WeatherStatus\"," +
+                    "\"fields\": [" +
+                    "{\"name\": \"station_id\", \"type\": \"long\"}," +
+                    "{\"name\": \"s_no\", \"type\": \"long\"}," +
+                    "{\"name\": \"battery_status\", \"type\": \"string\"}," +
+                    "{\"name\": \"status_timestamp\", \"type\": \"long\"}," +
+                    "{\"name\": \"weather\", \"type\": {" +
+                    "\"type\": \"record\"," +
+                    "\"name\": \"WeatherInfo\"," +
+                    "\"fields\": [" +
+                    "{\"name\": \"humidity\", \"type\": \"int\"}," +
+                    "{\"name\": \"temperature\", \"type\": \"int\"}," +
+                    "{\"name\": \"wind_speed\", \"type\": \"int\"}" +
+                    "]" +
+                    "}}" +
+                    "]" +
+                    "}"
+    );
     public static void main(String[] args) {
         final String TOPIC_NAME = "sensor-data-topic";
         System.out.println("Starting Kafka consumer...");
@@ -22,6 +56,11 @@ public class CentralStation {
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         Consumer<String, String> consumer = new org.apache.kafka.clients.consumer.KafkaConsumer<>(props);
         consumer.subscribe(Collections.singletonList(TOPIC_NAME));
+
+        // Consume messages from Kafka and write to Parquet
+        Map<Long, List<GenericRecord>> recordBatch = new HashMap<>();
+        int batchSize = 100;
+        int processedCount = 0;
         while (true) {
             ConsumerRecords<String, String> messages = consumer.poll(Duration.ofMillis(1000));
             for (ConsumerRecord<String, String> record : messages) {
@@ -30,12 +69,92 @@ public class CentralStation {
                 SensorData sensorData = null;
                 try {
                     sensorData = objectMapper.readValue(record.value(), SensorData.class);
-                    System.out.println("Received: " + sensorData);
+                    setAvroRecord(sensorData, recordBatch);
+                    if (++processedCount == batchSize) {
+                        // Write the batch to Parquet file
+                        writeRecordBatch(recordBatch);
+                        recordBatch.clear();
+                        System.out.println("Processed records count: " + processedCount);
+                        processedCount = 0;
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
         }
 
+    }
+
+    public static void setAvroRecord(SensorData sensorData, Map<Long, List<GenericRecord>> recordBatch){
+        GenericRecordBuilder recordBuilder = new GenericRecordBuilder(avroSchema);
+
+        // Set field values in the record builder
+        recordBuilder.set("station_id", sensorData.getStationId());
+        recordBuilder.set("s_no", sensorData.getSNo());
+        recordBuilder.set("battery_status", sensorData.getBatteryStatus());
+        recordBuilder.set("status_timestamp", sensorData.getStatusTimestamp());
+
+        GenericRecord weatherInfo = new GenericData.Record(avroSchema.getField("weather").schema());
+        weatherInfo.put("humidity", sensorData.getWeather().getHumidity());
+        weatherInfo.put("temperature", sensorData.getWeather().getTemperature());
+        weatherInfo.put("wind_speed", sensorData.getWeather().getWindSpeed());
+        recordBuilder.set("weather", weatherInfo);
+        GenericRecord rec = recordBuilder.build();
+        recordBatch.get(sensorData.getStationId()).add(rec);
+    }
+    private static void writeRecordBatch(Map<Long, List<GenericRecord>> recordBatch) {
+        try {
+            // Get current timestamp
+            long timestamp = System.currentTimeMillis();
+
+            // Convert timestamp to Date object
+            Date date = new Date(timestamp);
+
+            // Define the desired date and time format
+            String format = "yyyy-MM-dd_HH-mm-ss";
+
+            // Create a SimpleDateFormat object with the desired format
+            SimpleDateFormat sdf = new SimpleDateFormat(format);
+
+            // Format the date and time
+            String formattedDateTime = sdf.format(date);
+
+            for (Map.Entry<Long, List<GenericRecord>> entry : recordBatch.entrySet()) {
+                // Create Parquet writer
+                ParquetWriter<GenericRecord> writer = createParquetWriter(entry.getKey(), formattedDateTime);
+
+                for (GenericRecord record : entry.getValue()) {
+                    writer.write(record);
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to write record batch to Parquet file", e);
+        }
+    }
+    private static ParquetWriter<GenericRecord> createParquetWriter(Long stationId, String dateTime) {
+        File outputDir = new File(OUTPUT_DIRECTORY);
+        if (!outputDir.exists()) {
+            outputDir.mkdirs();
+        }
+
+        outputDir = new File(OUTPUT_DIRECTORY + "/" + stationId);
+        if (!outputDir.exists()) {
+            outputDir.mkdirs();
+        }
+
+        String parquetFilePath = OUTPUT_DIRECTORY + "/" + stationId + File.separator + dateTime + ".parquet";
+        ParquetWriter<GenericRecord> writer;
+        try {
+            writer = AvroParquetWriter
+                    .<GenericRecord>builder(new org.apache.hadoop.fs.Path(parquetFilePath))
+                    .withSchema(avroSchema)
+                    .withCompressionCodec(CompressionCodecName.SNAPPY)
+                    .withPageSize(ParquetWriter.DEFAULT_PAGE_SIZE)
+                    .build();
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to create Parquet writer", e);
+        }
+
+        return writer;
     }
 }

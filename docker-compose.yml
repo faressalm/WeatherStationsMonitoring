@@ -30,13 +30,13 @@ services:
     environment:
       - STATION_ID=1
 
-#  weatherstation2:
-#    build: weatherstation
-#    container_name: weatherstation-2
-#    depends_on:
-#      - kafka
-#    environment:
-#      - STATION_ID=2
+  weatherstation2:
+    build: weatherstation
+    container_name: weatherstation-2
+    depends_on:
+      - kafka
+    environment:
+      - STATION_ID=2
 
   centralstation:
      build: centralstation

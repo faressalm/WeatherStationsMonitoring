@@ -10,20 +10,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="2be38a2b-52d1-4cd0-b140-6ab04ff81452" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/artifacts/rain_detector_jar.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Dockerfile" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/RainDetector.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/SensorData.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/META-INF/MANIFEST.MF" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../centralstation/out/artifacts/central_station_jar/central_station.jar" beforeDir="false" afterPath="$PROJECT_DIR$/../centralstation/out/artifacts/central_station_jar/central_station.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/out/artifacts/rain_detector_jar/raindetector.jar" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../centralstation/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../centralstation/pom.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../centralstation/src/main/java/org/example/CentralStation.java" beforeDir="false" afterPath="$PROJECT_DIR$/../centralstation/src/main/java/org/example/CentralStation.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/../docker-compose.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/RainDetector.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/RainDetector.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/SensorData.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/SensorData.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

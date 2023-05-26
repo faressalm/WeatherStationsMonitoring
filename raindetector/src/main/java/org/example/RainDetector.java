@@ -46,7 +46,7 @@ public class RainDetector {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-            return "Humidity is too high! for station "+ sensorData.getStationId();
+            return "Humidity is too high! for station "+ sensorData.getStationId() + " at " + sensorData.getStatusTimestampFormatted();
         }).to(OUTPUT_TOPIC); // Publish the special message to the output topic
 
         // Build the topology and start Kafka Streams

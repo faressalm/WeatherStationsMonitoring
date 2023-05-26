@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class SensorData {
     @JsonProperty("station_id")
@@ -123,5 +125,16 @@ public class SensorData {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public String getStatusTimestampFormatted() {
+        // Create a SimpleDateFormat instance with the desired date format
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+        // Convert the statusTimestamp to a Date object
+        Date date = new Date(statusTimestamp * 1000); // Assuming statusTimestamp is in seconds
+
+        // Format the date using SimpleDateFormat
+        return dateFormat.format(date);
     }
 }
