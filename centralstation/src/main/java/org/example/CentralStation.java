@@ -58,7 +58,7 @@ public class CentralStation {
         consumer.subscribe(Collections.singletonList(TOPIC_NAME));
         Bitcask bitcask = new Bitcask();
         // Consume messages from Kafka and write to Parquet
-        Map<Long, List<GenericRecord>> recordBatch = new HashMap<>();
+        Map<Long, List<GenericData.Record>> recordBatch = new HashMap<>();
         int batchSize = 100;
         int processedCount = 0;
         // invoke thread to compact on replica
@@ -92,7 +92,7 @@ public class CentralStation {
 
     }
 
-    public static void setAvroRecord(SensorData sensorData, Map<Long, List<GenericRecord>> recordBatch){
+    public static void setAvroRecord(SensorData sensorData, Map<Long, List<GenericData.Record>> recordBatch){
         GenericData.Record rec = new GenericData.Record(avroSchema);
 
         // Set field values in the record builder
@@ -109,7 +109,7 @@ public class CentralStation {
         recordBatch.computeIfAbsent(sensorData.getStationId(), key -> new ArrayList<>()).add(rec);
 
     }
-    private static void writeRecordBatch(Map<Long, List<GenericRecord>> recordBatch) {
+    private static void writeRecordBatch(Map<Long, List<GenericData.Record>> recordBatch) {
         try {
             // Get current timestamp
             long timestamp = System.currentTimeMillis();
@@ -126,11 +126,11 @@ public class CentralStation {
             // Format the date and time
             String formattedDateTime = sdf.format(date);
 
-            for (Map.Entry<Long, List<GenericRecord>> entry : recordBatch.entrySet()) {
+            for (Map.Entry<Long, List<GenericData.Record>> entry : recordBatch.entrySet()) {
                 // Create Parquet writer
-                ParquetWriter<GenericRecord> writer = createParquetWriter(entry.getKey(), formattedDateTime);
+                ParquetWriter<GenericData.Record> writer = createParquetWriter(entry.getKey(), formattedDateTime);
 
-                for (GenericRecord record : entry.getValue()) {
+                for (GenericData.Record record : entry.getValue()) {
                     writer.write(record);
                 }
             }
@@ -138,7 +138,7 @@ public class CentralStation {
             throw new RuntimeException("Failed to write record batch to Parquet file", e);
         }
     }
-    private static ParquetWriter<GenericRecord> createParquetWriter(Long stationId, String dateTime) {
+    private static ParquetWriter<GenericData.Record> createParquetWriter(Long stationId, String dateTime) {
         File outputDir = new File(OUTPUT_DIRECTORY);
         if (!outputDir.exists()) {
             outputDir.mkdirs();
@@ -150,13 +150,15 @@ public class CentralStation {
         }
 
         String parquetFilePath = OUTPUT_DIRECTORY + "/station" + stationId + File.separator + dateTime + ".parquet";
-        ParquetWriter<GenericRecord> writer;
+        ParquetWriter<GenericData.Record> writer;
         try {
             writer = AvroParquetWriter
-                    .<GenericRecord>builder(new org.apache.hadoop.fs.Path(parquetFilePath))
+                    .<GenericData.Record>builder(new org.apache.hadoop.fs.Path(parquetFilePath))
                     .withSchema(avroSchema)
                     .withCompressionCodec(CompressionCodecName.SNAPPY)
+                    .withRowGroupSize(ParquetWriter.DEFAULT_BLOCK_SIZE)
                     .withPageSize(ParquetWriter.DEFAULT_PAGE_SIZE)
+                    .withConf(new Configuration())
                     .build();
         } catch (IOException e) {
             throw new RuntimeException("Failed to create Parquet writer", e);
