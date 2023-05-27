@@ -67,7 +67,8 @@ services:
       - '9200:9200'
 
   elasticsearchservice:
-    build: elasticsearchservice
+    build:
+      context: ./elasticsearchservice
     container_name: elasticsearchservice
     depends_on:
       - elasticsearch
