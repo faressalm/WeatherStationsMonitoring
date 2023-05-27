@@ -93,20 +93,19 @@ public class CentralStation {
     }
 
     public static void setAvroRecord(SensorData sensorData, Map<Long, List<GenericRecord>> recordBatch){
-        GenericRecordBuilder recordBuilder = new GenericRecordBuilder(avroSchema);
+        GenericData.Record rec = new GenericData.Record(avroSchema);
 
         // Set field values in the record builder
-        recordBuilder.set("station_id", sensorData.getStationId());
-        recordBuilder.set("s_no", sensorData.getSNo());
-        recordBuilder.set("battery_status", sensorData.getBatteryStatus());
-        recordBuilder.set("status_timestamp", sensorData.getStatusTimestamp());
+        rec.put("station_id", sensorData.getStationId());
+        rec.put("s_no", sensorData.getSNo());
+        rec.put("battery_status", sensorData.getBatteryStatus());
+        rec.put("status_timestamp", sensorData.getStatusTimestamp());
 
-        GenericRecord weatherInfo = new GenericData.Record(avroSchema.getField("weather").schema());
+        GenericData.Record weatherInfo = new GenericData.Record(avroSchema.getField("weather").schema());
         weatherInfo.put("humidity", sensorData.getWeather().getHumidity());
         weatherInfo.put("temperature", sensorData.getWeather().getTemperature());
         weatherInfo.put("wind_speed", sensorData.getWeather().getWindSpeed());
-        recordBuilder.set("weather", weatherInfo);
-        GenericRecord rec = recordBuilder.build();
+        rec.put("weather", weatherInfo);
         recordBatch.computeIfAbsent(sensorData.getStationId(), key -> new ArrayList<>()).add(rec);
 
     }

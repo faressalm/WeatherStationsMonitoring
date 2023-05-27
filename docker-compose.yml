@@ -1,34 +1,34 @@
 version: '3'
 services:
-  zookeeper:
-    image: 'bitnami/zookeeper:latest'
-    container_name: zookeeper
-    ports:
-      - '2181:2181'
-    environment:
-      - ALLOW_ANONYMOUS_LOGIN=yes
-  kafka:
-    image: 'bitnami/kafka:latest'
-    container_name: kafka
-    ports:
-      - '9092:9092'
-    environment:
-      - ALLOW_PLAINTEXT_LISTENER=yes
-      - KAFKA_ENABLE_KRAFT=no
-      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
-      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092
-      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
-      - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true
-    depends_on:
-      - zookeeper
-
-  weatherstation:
-    build: weatherstation
-    container_name: weatherstation-1
-    depends_on:
-      - kafka
-    environment:
-      - STATION_ID=1
+#  zookeeper:
+#    image: 'bitnami/zookeeper:latest'
+#    container_name: zookeeper
+#    ports:
+#      - '2181:2181'
+#    environment:
+#      - ALLOW_ANONYMOUS_LOGIN=yes
+#  kafka:
+#    image: 'bitnami/kafka:latest'
+#    container_name: kafka
+#    ports:
+#      - '9092:9092'
+#    environment:
+#      - ALLOW_PLAINTEXT_LISTENER=yes
+#      - KAFKA_ENABLE_KRAFT=no
+#      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+#      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092
+#      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
+#      - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true
+#    depends_on:
+#      - zookeeper
+#
+#  weatherstation:
+#    build: weatherstation
+#    container_name: weatherstation-1
+#    depends_on:
+#      - kafka
+#    environment:
+#      - STATION_ID=1
 
 #  weatherstation2:
 #    build: weatherstation
@@ -38,14 +38,14 @@ services:
 #    environment:
 #      - STATION_ID=2
 
-  centralstation:
-     build: centralstation
-     container_name: centralstation
-     depends_on:
-       - kafka
-       - weatherstation
-     volumes:
-       - ./parquet_data:/usr/app/weather_monitoring/stations_parquet_log
+#  centralstation:
+#     build: centralstation
+#     container_name: centralstation
+#     depends_on:
+#       - kafka
+#       - weatherstation
+#     volumes:
+#       - ./parquet_data:/usr/app/weather_monitoring/stations_parquet_log
 
 #  raindetector:
 #     build: raindetector
@@ -71,6 +71,5 @@ services:
     container_name: elasticsearchservice
     depends_on:
       - elasticsearch
-      - es-data
     volumes:
-      - ./parquet_data:/usr/app
+      - ./parquet_data:/app
