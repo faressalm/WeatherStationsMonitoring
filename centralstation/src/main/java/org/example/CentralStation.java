@@ -2,6 +2,7 @@ package org.example;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.avro.Schema;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.parquet.avro.AvroParquetWriter;
@@ -133,6 +134,7 @@ public class CentralStation {
                 for (GenericData.Record record : entry.getValue()) {
                     writer.write(record);
                 }
+                writer.close();
             }
         } catch (IOException e) {
             throw new RuntimeException("Failed to write record batch to Parquet file", e);
@@ -155,7 +157,6 @@ public class CentralStation {
             writer = AvroParquetWriter
                     .<GenericData.Record>builder(new org.apache.hadoop.fs.Path(parquetFilePath))
                     .withSchema(avroSchema)
-                    .withCompressionCodec(CompressionCodecName.SNAPPY)
                     .withRowGroupSize(ParquetWriter.DEFAULT_BLOCK_SIZE)
                     .withPageSize(ParquetWriter.DEFAULT_PAGE_SIZE)
                     .withConf(new Configuration())

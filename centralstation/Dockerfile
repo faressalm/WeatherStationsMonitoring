@@ -1,4 +1,4 @@
 FROM openjdk:8-jre-alpine
-COPY out/artifacts/central_station_jar/central_station.jar /usr/app/
+COPY out/artifacts/centralstation_jar/centralstation.jar /usr/app/
 WORKDIR /usr/app
-ENTRYPOINT sleep 35 && java -jar central_station.jar
+ENTRYPOINT sleep 35 && java -jar centralstation.jar
