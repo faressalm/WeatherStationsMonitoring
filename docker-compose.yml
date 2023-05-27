@@ -44,9 +44,8 @@ services:
      depends_on:
        - kafka
        - weatherstation
-       - es-data
      volumes:
-       - es-data:/usr/app/
+       - ./parquet_data:/usr/app/weather_monitoring/stations_parquet_log
 
 #  raindetector:
 #     build: raindetector
@@ -66,11 +65,6 @@ services:
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     ports:
       - '9200:9200'
-    depends_on:
-      - elasticsearch
-      - es-data
-    volumes:
-      - es-data:/usr/share/elasticsearch/data
 
   elasticsearchservice:
     build: elasticsearchservice
@@ -79,7 +73,4 @@ services:
       - elasticsearch
       - es-data
     volumes:
-      - es-data:/usr/data
-
-volumes:
-  es-data:
+      - ./parquet_data:/usr/app

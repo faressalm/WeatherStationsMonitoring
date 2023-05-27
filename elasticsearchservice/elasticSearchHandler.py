@@ -10,7 +10,7 @@ es = Elasticsearch(['http://localhost:9200'])
 index_name = 'weather_statuses_index'  # Specify the Elasticsearch index name
 
 # Define the folder path to monitor
-folder_path = '/home/abdelmonem/PycharmProjects/ES_handler/parquets'
+folder_path = '/usr/app'
 
 
 class ParquetFileHandler(FileSystemEventHandler):
