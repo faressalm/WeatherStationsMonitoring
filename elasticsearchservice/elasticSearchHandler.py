@@ -75,7 +75,7 @@ observer.start()
 try:
     # Keep the main thread alive
     while True:
-        time.sleep(1)
+        observer.join(timeout=0.1)
 except KeyboardInterrupt:
     # Stop the observer when interrupted
     observer.stop()

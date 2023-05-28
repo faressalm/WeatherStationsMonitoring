@@ -60,7 +60,7 @@ public class CentralStation {
         Bitcask bitcask = new Bitcask();
         // Consume messages from Kafka and write to Parquet
         Map<Long, List<GenericData.Record>> recordBatch = new HashMap<>();
-        int batchSize = 100;
+        int batchSize = 10000;
         int processedCount = 0;
         // invoke thread to compact on replica
         bitcask.run_compaction();

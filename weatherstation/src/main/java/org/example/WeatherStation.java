@@ -73,7 +73,7 @@ public class WeatherStation {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-            }, 0, 1, TimeUnit.SECONDS);
+            }, 0, 10, TimeUnit.MILLISECONDS);
 
             // Sleep indefinitely to keep the producer running
             Thread.sleep(Long.MAX_VALUE);

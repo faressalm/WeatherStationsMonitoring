@@ -37,6 +37,70 @@ services:
       - kafka
     environment:
       - STATION_ID=2
+  
+  weatherstation3:
+    build: weatherstation
+    container_name: weatherstation-3
+    depends_on:
+      - kafka
+    environment:
+      - STATION_ID=3
+
+  weatherstation4:
+    build: weatherstation
+    container_name: weatherstation-4
+    depends_on:
+      - kafka
+    environment:
+      - STATION_ID=4
+
+  weatherstation5:
+    build: weatherstation
+    container_name: weatherstation-5
+    depends_on:
+      - kafka
+    environment:
+      - STATION_ID=5
+
+  weatherstation6:
+    build: weatherstation
+    container_name: weatherstation-6
+    depends_on:
+      - kafka
+    environment:
+      - STATION_ID=6
+
+  weatherstation7:
+    build: weatherstation
+    container_name: weatherstation-7
+    depends_on:
+      - kafka
+    environment:
+      - STATION_ID=7
+
+  weatherstation8:
+    build: weatherstation
+    container_name: weatherstation-8
+    depends_on:
+      - kafka
+    environment:
+      - STATION_ID=8
+
+  weatherstation9:
+    build: weatherstation
+    container_name: weatherstation-9
+    depends_on:
+      - kafka
+    environment:
+      - STATION_ID=9
+
+  weatherstation10:
+    build: weatherstation
+    container_name: weatherstation-10
+    depends_on:
+      - kafka
+    environment:
+      - STATION_ID=10
 
   centralstation:
      build: centralstation
