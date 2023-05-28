@@ -55,7 +55,7 @@ services:
        - weatherstation
 
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.13.2
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.14.0
     container_name: elasticsearch
     environment:
       - discovery.type=single-node
@@ -66,9 +66,20 @@ services:
     ports:
       - '9200:9200'
 
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.14.0
+    container_name: kibana
+    ports:
+      - '5601:5601'
+    depends_on:
+      - elasticsearch
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+
   elasticsearchservice:
     build:
       context: ./elasticsearchservice
+      dockerfile: Dockerfile
     container_name: elasticsearchservice
     depends_on:
       - elasticsearch

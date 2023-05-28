@@ -74,7 +74,7 @@ public class CentralStation {
                     sensorData = objectMapper.readValue(record.value(), SensorData.class);
                     // Parquet
                     setAvroRecord(sensorData, recordBatch);
-                    if (++processedCount == batchSize) {
+                    if (++processedCount >= batchSize) {
                         // Write the batch to Parquet file
                         writeRecordBatch(recordBatch);
                         recordBatch.clear();

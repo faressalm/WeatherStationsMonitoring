@@ -1,3 +1,4 @@
 watchdog
-elasticsearch
+elasticsearch==7.14.0
 pandas
+pyarrow
