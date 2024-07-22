@@ -11,6 +11,8 @@ The project was developed by:
 - Ahmed Mohamed Abd-El Monem
 - Basel Ayman Mohamed
 
+![image](https://github.com/user-attachments/assets/39e813ca-acb2-431e-9335-45563b25aac0)
+
 ## Weather Station Mock
 
 The Weather Station Mock is a Java program that generates simulated weather sensor data and sends it to a Kafka topic. The data is sent as JSON strings, and the code uses the Jackson library to convert the `SensorData` object to a JSON string. The code is designed to run indefinitely and sends data at one message per second.
